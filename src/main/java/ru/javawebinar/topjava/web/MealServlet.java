@@ -74,15 +74,15 @@ public class MealServlet extends HttpServlet {
                 DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         String description = req.getParameter("description");
         int calories = Integer.parseInt(req.getParameter("calories"));
-        Optional<String> idParameter = Optional.ofNullable(req.getParameter("id"));
-        long id = Long.parseLong(idParameter.orElse("0"));
-        if (id == 0)
+        String idParameter = req.getParameter("id");
+        if (idParameter.isEmpty())
         {
             Meal meal = new Meal(0 ,mealTime, description, calories);
             mealDAO.create(meal);
         }
         else
         {
+            long id = Long.parseLong(idParameter);
             mealDAO.update(new Meal(id, mealTime, description, calories));
         }
         resp.sendRedirect("meals");

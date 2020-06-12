@@ -6,8 +6,8 @@
     <title>Meal</title>
 </head>
 <body>
-<h3><a href="index.html">Home</a></h3>
-<form action="meals" method="post">
+<h3><a href="../index.html">Home</a></h3>
+<form action="meal" method="post">
     <input name="id" hidden value="${meal.id}">
     <label for="desc">Описание</label>
     <input id="desc" type="text" name="description" placeholder="Завтрак" value="${meal.description}"
@@ -18,6 +18,6 @@
     <input id="cal" type="number" name="calories" value="${meal.calories}" required>
     <input type="submit" value="Сохранить">
 </form>
-<h3><a href="meals">Назад</a></h3>
+<h3><a href="../meals">Назад</a></h3>
 </body>
 </html>

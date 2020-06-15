@@ -18,11 +18,46 @@
 </head>
 <body>
 <section>
+    <h4>Вы зашли как пользователь ${userId}</h4>
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
+    <form method="get" action="meals">
+        <input type="hidden" name="action" value="filter">
+        <table border="1" cellpadding="8" cellspacing="8">
+            <caption>Фильтры</caption>
+            <thead>
+            <tr>
+                <th>От даты (включая)</th>
+                <th>До даты (включая)</th>
+                <th>От времени (включая)</th>
+                <th>До времени (исключая)</th>
+                <th>Описание</th>
+            </tr>
+            </thead>
+            <tr>
+                <td>
+                    <input type="date" name="fromDate">
+                </td>
+                <td>
+                    <input type="date" name="toDate">
+                </td>
+                <td>
+                    <input type="time" name="fromTime">
+                </td>
+                <td>
+                    <input type="time" name="toTime">
+                </td>
+                <td>
+                    <input type="text" name="description">
+                </td>
+            </tr>
+        </table>
+        <input type="submit">
+        <a href="meals">Очистить фильтр</a>
+    </form>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>

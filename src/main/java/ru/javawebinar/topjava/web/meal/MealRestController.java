@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.to.MealTo;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
@@ -14,6 +15,7 @@ import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserCaloriesPerDay;
 import static ru.javawebinar.topjava.web.SecurityUtil.authUserId;
@@ -38,14 +40,14 @@ public class MealRestController {
     }
 
     public Meal create(Meal meal) {
-        log.info("create {} for userId={}", meal, authUserId());
         checkNew(meal);
+        log.info("create {} for userId={}", meal, authUserId());
         return service.create(meal, authUserId());
     }
 
     public void update(Meal meal, int id) {
-        log.info("update {} for userId={}", meal, authUserId());
         assureIdConsistent(meal, id);
+        log.info("update {} for userId={}", meal, authUserId());
         service.update(meal, authUserId());
     }
 
@@ -54,15 +56,12 @@ public class MealRestController {
         service.delete(id, authUserId());
     }
 
-    public List<MealTo> getByDescriptionAndDateTime(String description, String fromDate, String toDate,
-                                                    String fromTime, String toTime) {
-        log.info("getByDescription={} and Date from={} to={} and Time from={} to={} for userId={}",
-                description, fromDate, toDate, fromTime, toTime, authUserId());
-        LocalDate parsedFromDate = fromDate == null || fromDate.isEmpty() ? null : LocalDate.parse(fromDate);
-        LocalDate parsedToDate = toDate == null || toDate.isEmpty() ? null : LocalDate.parse(toDate);
-        LocalTime parsedFromTime = fromTime == null || fromTime.isEmpty() ? null : LocalTime.parse(fromTime);
-        LocalTime parsedToTime = toTime == null || toTime.isEmpty() ? null : LocalTime.parse(toTime);
-        return MealsUtil.getTos(service.getAllFilteredByDescriptionAndDateTime(authUserId(), description, parsedFromDate,
-                parsedToDate, parsedFromTime, parsedToTime), authUserCaloriesPerDay());
+    public List<MealTo> getByDateTime(LocalDate fromDate, LocalDate toDate, LocalTime fromTime, LocalTime toTime) {
+        log.info("getBy Date from={} to={} and Time from={} to={} for userId={}", fromDate, toDate, fromTime, toTime,
+                authUserId());
+        return MealsUtil.getTos(service.getAllFilteredByDate(authUserId(), fromDate,
+                toDate), authUserCaloriesPerDay()).stream()
+                .filter(mealTo -> DateTimeUtil.isBetweenHalfOpen(mealTo.getDateTime().toLocalTime(), fromTime, toTime))
+                .collect(Collectors.toList());
     }
 }

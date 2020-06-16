@@ -5,19 +5,19 @@ import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
-import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Repository
 public class InMemoryMealRepository implements MealRepository {
-    private Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
@@ -29,68 +29,48 @@ public class InMemoryMealRepository implements MealRepository {
     public Meal save(Meal meal, int userId) {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            meal.setUserId(userId);
-            repository.put(meal.getId(), meal);
+            Map<Integer, Meal> meals = repository.get(userId);
+            if (meals == null) {
+                repository.put(userId, new ConcurrentHashMap<>());
+                meals = repository.get(userId);
+            }
+            meals.put(meal.getId(), meal);
             return meal;
         } else {
-            // handle case: update, but not present in storage
-            try {
-                return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> {
-                    if (oldMeal.getUserId().equals(userId)) {
-                        meal.setUserId(oldMeal.getUserId());
-                        return meal;
-                    }
-                    throw new NotFoundException(oldMeal.toString() + " don't belong to userId=" + userId);
-                });
-            } catch (NotFoundException e) {
-                return null;
-            }
+            if (get(meal.getId(), userId) == null) return null;
+            return repository.get(userId).put(meal.getId(), meal);
         }
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        Meal meal = repository.get(id);
-        if (meal == null || !meal.getUserId().equals(userId)) {
-            return false;
-        }
-        return repository.remove(id) != null;
+        if (get(id, userId) == null) return false;
+        return repository.get(userId).remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
-        Meal meal = repository.get(id);
-        if (meal == null || !meal.getUserId().equals(userId)) {
+        Map<Integer, Meal> meals = repository.get(userId);
+        if (meals == null || meals.get(id) == null) {
             return null;
         }
-        return meal;
+        return meals.get(id);
     }
 
     @Override
-    public Collection<Meal> getAll(int userId) {
-        return repository.values().stream()
-                .filter(meal -> meal.getUserId().equals(userId))
-                .sorted((meal1, meal2) -> meal2.getDateTime().compareTo(meal1.getDateTime()))
-                .collect(Collectors.toList());
+    public List<Meal> getAll(int userId) {
+        return getAllFilteredByPredicate(userId, meal -> true);
     }
 
     @Override
-    public Collection<Meal> getAllFilteredByDescriptionAndDateTime(int userId, String description, LocalDate fromDate,
-                                                                   LocalDate toDate, LocalTime fromTime, LocalTime toTime) {
-        if (description == null) description = "";
-        if (fromDate == null) fromDate = LocalDate.MIN;
-        if (toDate == null) toDate = LocalDate.MAX;
-        if (fromTime == null) fromTime = LocalTime.MIN;
-        if (toTime == null) toTime = LocalTime.MAX;
-        final String constDescription = description;
-        final LocalTime constFromTime = fromTime;
-        final LocalTime constToTime = toTime;
-        final LocalDate constFromDate = fromDate;
-        final LocalDate constToDate = toDate;
-        return getAll(userId).stream()
-                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(), constFromDate, constToDate) &&
-                        DateTimeUtil.isBetweenHalfOpen(meal.getTime(), constFromTime, constToTime) &&
-                        meal.getDescription().contains(constDescription))
+    public List<Meal> getAllFilteredByDate(int userId, LocalDate fromDate, LocalDate toDate) {
+        return getAllFilteredByPredicate(userId, meal -> DateTimeUtil.isBetween(meal.getDate(), fromDate, toDate));
+    }
+
+    private List<Meal> getAllFilteredByPredicate(int userId, Predicate<Meal> filter) {
+        return repository.get(userId).values().stream()
+                .filter(filter)
+                .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
 }

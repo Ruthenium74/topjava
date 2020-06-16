@@ -18,7 +18,6 @@
 </head>
 <body>
 <section>
-    <h4>Вы зашли как пользователь ${userId}</h4>
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
@@ -34,28 +33,24 @@
                 <th>До даты (включая)</th>
                 <th>От времени (включая)</th>
                 <th>До времени (исключая)</th>
-                <th>Описание</th>
             </tr>
             </thead>
             <tr>
                 <td>
-                    <input type="date" name="fromDate">
+                    <input type="date" name="fromDate" value="${param.get("fromDate")}">
                 </td>
                 <td>
-                    <input type="date" name="toDate">
+                    <input type="date" name="toDate" value="${param.get("toDate")}">
                 </td>
                 <td>
-                    <input type="time" name="fromTime">
+                    <input type="time" name="fromTime" value="${param.get("fromTime")}">
                 </td>
                 <td>
-                    <input type="time" name="toTime">
-                </td>
-                <td>
-                    <input type="text" name="description">
+                    <input type="time" name="toTime" value="${param.get("toTime")}">
                 </td>
             </tr>
         </table>
-        <input type="submit">
+        <input type="submit" value="Отфильтровать">
         <a href="meals">Очистить фильтр</a>
     </form>
     <table border="1" cellpadding="8" cellspacing="0">

@@ -13,7 +13,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
@@ -55,7 +57,6 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        request.setAttribute("userId", SecurityUtil.authUserId());
         switch (action == null ? "all" : action) {
             case "delete":
                 int id = getId(request);
@@ -72,14 +73,19 @@ public class MealServlet extends HttpServlet {
                 request.getRequestDispatcher("/mealForm.jsp").forward(request, response);
                 break;
             case "filter":
-                log.info("getAllFilteredBy Description={} Date from={} to={} Time from={} to={}",
-                        request.getParameter("description"),
+                log.info("getAllFilteredBy Date from={} to={} Time from={} to={}",
                         request.getParameter("fromDate"), request.getParameter("toDate"),
                         request.getParameter("fromTime"), request.getParameter("toTime"));
-                request.setAttribute("meals", mealRestController.getByDescriptionAndDateTime(
-                        request.getParameter("description"),
-                        request.getParameter("fromDate"), request.getParameter("toDate"),
-                        request.getParameter("fromTime"), request.getParameter("toTime")));
+                String fromDate = request.getParameter("fromDate");
+                String toDate = request.getParameter("toDate");
+                String fromTime = request.getParameter("fromTime");
+                String toTime = request.getParameter("toTime");
+                LocalDate parsedFromDate = fromDate == null || fromDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(fromDate);
+                LocalDate parsedToDate = toDate == null || toDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(toDate);
+                LocalTime parsedFromTime = fromTime == null || fromTime.isEmpty() ? LocalTime.MIN : LocalTime.parse(fromTime);
+                LocalTime parsedToTime = toTime == null || toTime.isEmpty() ? LocalTime.MAX : LocalTime.parse(toTime);
+                request.setAttribute("meals", mealRestController.getByDateTime(parsedFromDate, parsedToDate,
+                        parsedFromTime, parsedToTime));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
             case "all":
             default:
@@ -92,7 +98,6 @@ public class MealServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        super.destroy();
         appCtx.close();
     }
 

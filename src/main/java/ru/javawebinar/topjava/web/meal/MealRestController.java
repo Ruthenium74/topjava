@@ -59,9 +59,19 @@ public class MealRestController {
     public List<MealTo> getByDateTime(LocalDate fromDate, LocalDate toDate, LocalTime fromTime, LocalTime toTime) {
         log.info("getBy Date from={} to={} and Time from={} to={} for userId={}", fromDate, toDate, fromTime, toTime,
                 authUserId());
-        return MealsUtil.getTos(service.getAllFilteredByDate(authUserId(), fromDate,
-                toDate), authUserCaloriesPerDay()).stream()
-                .filter(mealTo -> DateTimeUtil.isBetweenHalfOpen(mealTo.getDateTime().toLocalTime(), fromTime, toTime))
-                .collect(Collectors.toList());
+        if (fromDate == null) {
+            fromDate = LocalDate.MIN;
+        }
+        if (toDate == null) {
+            toDate = LocalDate.MAX.minusDays(1);
+        }
+        if (fromTime == null) {
+            fromTime = LocalTime.MIN;
+        }
+        if (toTime == null) {
+            toTime = LocalTime.MAX;
+        }
+        return MealsUtil.getFilteredTos(service.getAllFilteredByDate(authUserId(), fromDate,
+                toDate), authUserCaloriesPerDay(), fromTime, toTime);
     }
 }

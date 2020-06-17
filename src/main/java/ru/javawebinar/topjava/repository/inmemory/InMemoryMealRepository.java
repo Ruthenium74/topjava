@@ -29,32 +29,27 @@ public class InMemoryMealRepository implements MealRepository {
     public Meal save(Meal meal, int userId) {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            Map<Integer, Meal> meals = repository.get(userId);
-            if (meals == null) {
-                repository.put(userId, new ConcurrentHashMap<>());
-                meals = repository.get(userId);
-            }
-            meals.put(meal.getId(), meal);
-            return meal;
+            return repository.computeIfAbsent(userId, key -> new ConcurrentHashMap<>()).put(meal.getId(), meal);
         } else {
-            if (get(meal.getId(), userId) == null) return null;
-            return repository.get(userId).put(meal.getId(), meal);
+            Map<Integer, Meal> meals = repository.get(userId);
+            if (meals != null) {
+                Meal oldMeal = meals.replace(meal.getId(), meal);
+                return oldMeal == null ? null : meal;
+            }
+            return null;
         }
     }
 
     @Override
     public boolean delete(int id, int userId) {
-        if (get(id, userId) == null) return false;
-        return repository.get(userId).remove(id) != null;
+        Map<Integer, Meal> meals = repository.get(userId);
+        return meals != null && meals.remove(id) != null;
     }
 
     @Override
     public Meal get(int id, int userId) {
         Map<Integer, Meal> meals = repository.get(userId);
-        if (meals == null || meals.get(id) == null) {
-            return null;
-        }
-        return meals.get(id);
+        return meals == null ? null : meals.get(id);
     }
 
     @Override

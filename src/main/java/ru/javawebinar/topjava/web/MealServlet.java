@@ -80,10 +80,10 @@ public class MealServlet extends HttpServlet {
                 String toDate = request.getParameter("toDate");
                 String fromTime = request.getParameter("fromTime");
                 String toTime = request.getParameter("toTime");
-                LocalDate parsedFromDate = fromDate == null || fromDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(fromDate);
-                LocalDate parsedToDate = toDate == null || toDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(toDate);
-                LocalTime parsedFromTime = fromTime == null || fromTime.isEmpty() ? LocalTime.MIN : LocalTime.parse(fromTime);
-                LocalTime parsedToTime = toTime == null || toTime.isEmpty() ? LocalTime.MAX : LocalTime.parse(toTime);
+                LocalDate parsedFromDate = fromDate == null || fromDate.isEmpty() ? null : LocalDate.parse(fromDate);
+                LocalDate parsedToDate = toDate == null || toDate.isEmpty() ? null : LocalDate.parse(toDate);
+                LocalTime parsedFromTime = fromTime == null || fromTime.isEmpty() ? null : LocalTime.parse(fromTime);
+                LocalTime parsedToTime = toTime == null || toTime.isEmpty() ? null : LocalTime.parse(toTime);
                 request.setAttribute("meals", mealRestController.getByDateTime(parsedFromDate, parsedToDate,
                         parsedFromTime, parsedToTime));
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);

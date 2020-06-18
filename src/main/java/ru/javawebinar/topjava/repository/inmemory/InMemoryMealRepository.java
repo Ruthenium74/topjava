@@ -29,12 +29,12 @@ public class InMemoryMealRepository implements MealRepository {
     public Meal save(Meal meal, int userId) {
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            return repository.computeIfAbsent(userId, key -> new ConcurrentHashMap<>()).put(meal.getId(), meal);
+            repository.computeIfAbsent(userId, key -> new ConcurrentHashMap<>()).put(meal.getId(), meal);
+            return meal;
         } else {
             Map<Integer, Meal> meals = repository.get(userId);
             if (meals != null) {
-                Meal oldMeal = meals.replace(meal.getId(), meal);
-                return oldMeal == null ? null : meal;
+                return meals.replace(meal.getId(), meal) == null ? null : meal;
             }
             return null;
         }

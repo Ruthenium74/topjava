@@ -34,3 +34,4 @@ CREATE TABLE meals
     calories        INTEGER CONSTRAINT positive_calories CHECK ( calories > 0 ) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+CREATE UNIQUE INDEX meals_unique_date_time_and_user_id_idx ON meals (date_time, user_id);

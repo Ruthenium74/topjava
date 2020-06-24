@@ -48,6 +48,11 @@ public class MealServiceTest {
     }
 
     @Test
+    public void getNotFound() {
+        assertThrows(NotFoundException.class, () -> service.get(NOT_FOUND_MEAL_ID, FIRST_MEAL_OWNER_ID));
+    }
+
+    @Test
     public void delete() {
         service.delete(FIRST_MEAL_ID, FIRST_MEAL_OWNER_ID);
         assertNull(repository.get(FIRST_MEAL_ID, FIRST_MEAL_OWNER_ID));
@@ -59,20 +64,20 @@ public class MealServiceTest {
     }
 
     @Test
-    public void getBetweenInclusive() {
-        assertContains(service.getBetweenInclusive(LocalDate.parse("2020-06-21"), LocalDate.parse("2020-06-21"),
-                FIRST_MEAL_OWNER_ID), FIRST_MEAL);
+    public void deleteNotFound() {
+        assertThrows(NotFoundException.class, () -> service.delete(NOT_FOUND_MEAL_ID, FIRST_MEAL_OWNER_ID));
     }
 
     @Test
-    public void dontGetBetweenInclusive() {
-        assertDoesntContain(service.getBetweenInclusive(LocalDate.parse("2020-06-22"), LocalDate.parse("2020-06-22"),
-                FIRST_MEAL_OWNER_ID), FIRST_MEAL);
+    public void getBetweenInclusive() {
+        assertMatch(service.getBetweenInclusive(LocalDate.parse("2020-06-21"), LocalDate.parse("2020-06-21"),
+                FIRST_MEAL_OWNER_ID), THIRD_MEAL, FORTH_MEAL, SECOND_MEAL, FIRST_MEAL);
     }
 
     @Test
     public void getAll() {
-        assertContains(service.getAll(FIRST_MEAL_OWNER_ID), FIRST_MEAL);
+        assertMatch(service.getAll(FIRST_MEAL_OWNER_ID), SEVENTH_MEAL, SIXTH_MEAL, FIFTH_MEAL,
+                THIRD_MEAL, FORTH_MEAL, SECOND_MEAL, FIRST_MEAL);
     }
 
     @Test
@@ -93,7 +98,7 @@ public class MealServiceTest {
         Meal createdMeal = service.create(newMeal, FIRST_MEAL_OWNER_ID);
         Integer newId = createdMeal.getId();
         newMeal.setId(newId);
-        assertMatch(newMeal, createdMeal);
+        assertMatch(createdMeal, newMeal);
         assertMatch(service.get(newId, FIRST_MEAL_OWNER_ID), newMeal);
     }
 }

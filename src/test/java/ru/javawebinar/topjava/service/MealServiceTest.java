@@ -70,8 +70,9 @@ public class MealServiceTest {
 
     @Test
     public void getBetweenInclusive() {
-        assertMatch(service.getBetweenInclusive(LocalDate.parse("2020-06-21"), LocalDate.parse("2020-06-21"),
-                FIRST_MEAL_OWNER_ID), THIRD_MEAL, FORTH_MEAL, SECOND_MEAL, FIRST_MEAL);
+        assertMatch(service.getBetweenInclusive(LocalDate.of(2020, 6, 21),
+                LocalDate.of(2020, 6, 21), FIRST_MEAL_OWNER_ID),
+                THIRD_MEAL, FORTH_MEAL, SECOND_MEAL, FIRST_MEAL);
     }
 
     @Test

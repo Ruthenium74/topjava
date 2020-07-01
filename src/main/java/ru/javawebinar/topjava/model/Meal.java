@@ -21,7 +21,7 @@ import java.time.LocalTime;
 
 @Entity
 @Table(name = "meals", indexes = {@Index(name = "meals_unique_user_datetime_idx", columnList = "user_id, date_time",
-unique = true)})
+        unique = true)})
 public class Meal extends AbstractBaseEntity {
     public static final String DELETE = "Meal.delete";
     public static final String GET = "Meal.get";

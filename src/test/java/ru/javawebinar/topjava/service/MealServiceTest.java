@@ -1,7 +1,13 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.AfterClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
@@ -10,13 +16,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
-import java.time.LocalDate;
-import java.time.Month;
+import java.time.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertThrows;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 import static ru.javawebinar.topjava.UserTestData.USER_ID;
+import static org.slf4j.LoggerFactory.getLogger;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
@@ -25,6 +33,31 @@ import static ru.javawebinar.topjava.UserTestData.USER_ID;
 @RunWith(SpringRunner.class)
 @Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
 public class MealServiceTest {
+    private final static Logger log = getLogger(MealServiceTest.class);
+    private final static List<String> summary = new ArrayList<>();
+    private LocalDateTime startDateTime;
+
+    @Rule
+    public final TestRule watchman = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            super.starting(description);
+            startDateTime = LocalDateTime.now();
+        }
+
+        @Override
+        protected void finished(Description description) {
+            super.finished(description);
+            long duration = Duration.between(startDateTime, LocalDateTime.now()).toMillis();
+            summary.add(description.getDisplayName() + " - " + duration + " ms");
+            log.info(description.getDisplayName() + " - " + duration + " ms");
+        }
+    };
+
+    @AfterClass
+    public static void printSummary() {
+        summary.forEach(log::info);
+    }
 
     @Autowired
     private MealService service;

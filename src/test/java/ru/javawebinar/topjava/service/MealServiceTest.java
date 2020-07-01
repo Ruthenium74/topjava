@@ -35,28 +35,32 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MealServiceTest {
     private final static Logger log = getLogger(MealServiceTest.class);
     private final static List<String> summary = new ArrayList<>();
-    private LocalDateTime startDateTime;
+    private long startTime;
 
     @Rule
     public final TestRule watchman = new TestWatcher() {
         @Override
         protected void starting(Description description) {
             super.starting(description);
-            startDateTime = LocalDateTime.now();
+            startTime = System.nanoTime();
         }
 
         @Override
         protected void finished(Description description) {
             super.finished(description);
-            long duration = Duration.between(startDateTime, LocalDateTime.now()).toMillis();
-            summary.add(description.getDisplayName() + " - " + duration + " ms");
-            log.info(description.getDisplayName() + " - " + duration + " ms");
+            long duration = (System.nanoTime() - startTime) / 1000000;
+            String message = description.getMethodName() + " -> " + duration + " ms";
+            summary.add(message);
+            log.info(message);
         }
     };
 
     @AfterClass
     public static void printSummary() {
-        summary.forEach(log::info);
+        StringBuffer stringBuffer = new StringBuffer("\n\n");
+        stringBuffer.append("Test durations:\n");
+        summary.forEach(msg -> stringBuffer.append(msg).append("\n"));
+        log.info(stringBuffer.toString());
     }
 
     @Autowired

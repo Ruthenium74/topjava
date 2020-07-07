@@ -3,7 +3,6 @@ package ru.javawebinar.topjava.repository.jdbc;
 import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -34,13 +33,15 @@ public abstract class JdbcMealRepository implements MealRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public abstract MapSqlParameterSource getMapSqlParameterSource(Meal meal, int userId);
-
-    public abstract PreparedStatementSetter getPreparedStatement(int userId, LocalDateTime from, LocalDateTime to);
+    public abstract Object prepareDateTime(LocalDateTime dateTime);
 
     @Override
     public final Meal save(Meal meal, int userId) {
-        MapSqlParameterSource map = getMapSqlParameterSource(meal, userId);
+        MapSqlParameterSource map = new MapSqlParameterSource().addValue("id", meal.getId())
+                .addValue("description", meal.getDescription())
+                .addValue("calories", meal.getCalories())
+                .addValue("date_time", prepareDateTime(meal.getDateTime()))
+                .addValue("user_id", userId);
 
         if (meal.isNew()) {
             Number newId = insertMeal.executeAndReturnKey(map);
@@ -76,9 +77,8 @@ public abstract class JdbcMealRepository implements MealRepository {
 
     @Override
     public final List<Meal> getBetweenHalfOpen(LocalDateTime startDateTime, LocalDateTime endDateTime, int userId) {
-        PreparedStatementSetter preparedStatementSetter = getPreparedStatement(userId, startDateTime, endDateTime);
         return jdbcTemplate.query(
                 "SELECT * FROM meals WHERE user_id=?  AND date_time >=  ? AND date_time < ? ORDER BY date_time DESC",
-                preparedStatementSetter, ROW_MAPPER);
+                ROW_MAPPER, userId, prepareDateTime(startDateTime), prepareDateTime(endDateTime));
     }
 }

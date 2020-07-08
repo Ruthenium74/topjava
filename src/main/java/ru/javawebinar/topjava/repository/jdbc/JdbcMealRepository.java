@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 
-public abstract class JdbcMealRepository implements MealRepository {
+public abstract class JdbcMealRepository<T> implements MealRepository {
 
     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
 
@@ -33,7 +33,7 @@ public abstract class JdbcMealRepository implements MealRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public abstract Object prepareDateTime(LocalDateTime dateTime);
+    protected abstract T prepareDateTime(LocalDateTime dateTime);
 
     @Override
     public final Meal save(Meal meal, int userId) {

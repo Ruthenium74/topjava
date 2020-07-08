@@ -37,7 +37,8 @@ public class MealTestData {
     }
 
     public static Meal getMeal1WithUser() {
-        MEAL1.setUser(UserTestData.USER);
-        return MEAL1;
+        Meal meal1WithUser = new Meal(MEAL1.getId(), MEAL1.getDateTime(), MEAL1.getDescription(), MEAL1.getCalories());
+        meal1WithUser.setUser(UserTestData.USER);
+        return meal1WithUser;
     }
 }

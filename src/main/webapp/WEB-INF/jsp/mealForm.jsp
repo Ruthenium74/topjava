@@ -9,12 +9,7 @@
 <section>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <h2>
-        <c:if test="${meal.id == null}">
-            <spring:message code="meal.form.createTitle"/>
-        </c:if>
-        <c:if test="${meal.id != null}">
-            <spring:message code="meal.form.editTitle"/>
-        </c:if>
+        <spring:message code="meal.form.${meal.id == null ? 'create' : 'edit'}Title"/>
     </h2>
     <form method="post" action="meals/add">
         <input type="hidden" name="id" value="${meal.id}">

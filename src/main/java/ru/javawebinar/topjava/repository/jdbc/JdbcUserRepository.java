@@ -30,14 +30,10 @@ public class JdbcUserRepository implements UserRepository {
     private final ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
     private final Validator validator;
 
-    private static final ResultSetExtractor<Set<Role>> SINGLE_USER_ROLE_RESULT_SET_EXTRACTOR = new ResultSetExtractor<Set<Role>>() {
+    private static final RowMapper<Role> SINGLE_USER_ROLE_ROW_MAPPER = new RowMapper<Role>() {
         @Override
-        public Set<Role> extractData(ResultSet resultSet) throws SQLException, DataAccessException {
-            Set<Role> roles = new HashSet<>();
-            while (resultSet.next()) {
-                roles.add(Role.valueOf(resultSet.getString("role")));
-            }
-            return roles;
+        public Role mapRow(ResultSet resultSet, int i) throws SQLException {
+            return Role.valueOf(resultSet.getString("role"));
         }
     };
 
@@ -57,7 +53,7 @@ public class JdbcUserRepository implements UserRepository {
                     user.setRegistered(resultSet.getTimestamp("registered"));
                     user.setEnabled(resultSet.getBoolean("enabled"));
                     user.setCaloriesPerDay(resultSet.getInt("calories_per_day"));
-                    user.setRoles(Set.of(Role.valueOf(resultSet.getString("role"))));
+                    user.setRoles(EnumSet.of(Role.valueOf(resultSet.getString("role"))));
                     userMap.put(id, user);
                 } else {
                     Set<Role> userRoles = user.getRoles();
@@ -102,34 +98,13 @@ public class JdbcUserRepository implements UserRepository {
                 parameterSource) == 0) {
             return null;
         } else {
-            Set<Role> oldRoles = jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
-                    SINGLE_USER_ROLE_RESULT_SET_EXTRACTOR, user.getId());
-            Iterator<Role> iterator = oldRoles.iterator();
-            Set<Role> rolesForDelete = new HashSet<>();
-            while (iterator.hasNext()) {
-                Role oldRole = iterator.next();
-                if (!user.getRoles().contains(oldRole)) {
-                    rolesForDelete.add(oldRole);
-                }
-            }
-            if (rolesForDelete.size() > 0) {
-                Role[] roles = rolesForDelete.toArray(new Role[0]);
-                jdbcTemplate.batchUpdate("DELETE FROM user_roles WHERE user_id=? AND role=?",
-                        new RolesBatchPreparedStatementSetter(user.getId(), roles));
-            }
-            iterator = user.getRoles().iterator();
-            Set<Role> rolesForInsert = new HashSet<>();
-            while (iterator.hasNext()) {
-                Role newRole = iterator.next();
-                if (!oldRoles.contains(newRole)) {
-                    rolesForInsert.add(newRole);
-                }
-            }
-            if (rolesForInsert.size() > 0) {
-                Role[] roles = rolesForInsert.toArray(new Role[0]);
-                jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?,?)",
-                        new RolesBatchPreparedStatementSetter(user.getId(), roles));
-            }
+            List<Role> oldRoles = jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
+                    SINGLE_USER_ROLE_ROW_MAPPER, user.getId());
+            jdbcTemplate.batchUpdate("DELETE FROM user_roles WHERE user_id=? AND role=?",
+                    new RolesBatchPreparedStatementSetter(user.getId(), oldRoles.toArray(new Role[0])));
+            Set<Role> newRoles = user.getRoles();
+            jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?,?)",
+                    new RolesBatchPreparedStatementSetter(user.getId(), newRoles.toArray(new Role[0])));
         }
         return user;
     }

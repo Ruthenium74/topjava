@@ -1,7 +1,9 @@
 package ru.javawebinar.topjava.service;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataAccessException;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
@@ -18,6 +20,14 @@ import static ru.javawebinar.topjava.UserTestData.*;
 public abstract class AbstractUserServiceTest extends AbstractServiceTest {
 
     @Autowired
+    private CacheManager cacheManager;
+
+    @Before
+    public void setUp() throws Exception {
+        cacheManager.getCache("users").clear();
+    }
+
+    @Autowired
     protected UserService service;
 
     @Test
@@ -28,9 +38,12 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
         newUser.setId(newId);
         USER_MATCHER.assertMatch(created, newUser);
         USER_MATCHER.assertMatch(service.get(newId), newUser);
+    }
 
+    @Test
+    public void createAdmin() throws Exception {
         User adminCreated = service.create(getNewAdmin());
-        newId = adminCreated.id();
+        int newId = adminCreated.id();
         User newAdmin = getNewAdmin();
         newAdmin.setId(newId);
         USER_MATCHER.assertMatch(adminCreated, newAdmin);
@@ -47,7 +60,10 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     public void delete() throws Exception {
         service.delete(USER_ID);
         assertThrows(NotFoundException.class, () -> service.get(USER_ID));
+    }
 
+    @Test
+    public void deleteAdmin() throws Exception {
         service.delete(ADMIN_ID);
         assertThrows(NotFoundException.class, () -> service.get(ADMIN_ID));
     }
@@ -61,8 +77,11 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
     public void get() throws Exception {
         User user = service.get(USER_ID);
         USER_MATCHER.assertMatch(user, USER);
+    }
 
-        user = service.get(ADMIN_ID);
+    @Test
+    public void getAdmin() throws Exception {
+        User user = service.get(ADMIN_ID);
         USER_MATCHER.assertMatch(user, ADMIN);
     }
 
@@ -82,8 +101,11 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
         User updated = getUpdated();
         service.update(updated);
         USER_MATCHER.assertMatch(service.get(USER_ID), getUpdated());
+    }
 
-        updated = getAdminWithoutAdminRole();
+    @Test
+    public void updateAdmin() throws Exception {
+        User updated = getAdminWithoutAdminRole();
         service.update(updated);
         USER_MATCHER.assertMatch(service.get(ADMIN_ID), getAdminWithoutAdminRole());
     }

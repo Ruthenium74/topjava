@@ -29,14 +29,7 @@ public class MealRestController extends AbstractMealController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@RequestBody Meal meal, @PathVariable int id) {
-        if (meal.getId() == null) {
-            meal.setId(id);
-            super.update(meal, id);
-        } else if (meal.getId().equals(id)) {
-            super.update(meal, id);
-        } else {
-            ResponseEntity.status(HttpStatus.BAD_REQUEST);
-        }
+        super.update(meal, id);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

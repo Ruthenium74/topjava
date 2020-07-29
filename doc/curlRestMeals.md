@@ -1,17 +1,17 @@
-###delete
+### delete
 `curl -X DELETE http://localhost:8080/topjava/rest/meals/100002`
 
-###update
+### update
 `curl -X PUT -H "Content-Type: application/json" -d '{"id":100002,"dateTime":"2020-01-30T10:00:00","description":"Обновлённый завтрак","calories":200}' http://localhost:8080/topjava/rest/meals/100002`
 
-###create
+### create
 `curl -H "Content-Type: application/json" -d '{"dateTime":"2020-01-31T18:00:00","description":"Новый завтрак","calories":200}' http://localhost:8080/topjava/rest/meals`
 
-###getBetween
+### getBetween
 `curl 'http://localhost:8080/topjava/rest/meals/filter?fromDate=2020-01-30&toDate=2020-01-30'`
 
-###getAll
+### getAll
 `curl http://localhost:8080/topjava/rest/meals`
 
-###get
+### get
 `curl http://localhost:8080/topjava/rest/meals/100002`

@@ -54,4 +54,16 @@ public class MealTo {
                 ", excess=" + excess +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof MealTo)) return false;
+        MealTo that = (MealTo) obj;
+        if (!id.equals(that.id)) return false;
+        if (!dateTime.equals(that.dateTime)) return false;
+        if (!description.equals(that.description)) return false;
+        if (calories != that.calories) return false;
+        return excess == that.excess;
+    }
 }

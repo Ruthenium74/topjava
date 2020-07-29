@@ -16,7 +16,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @RestController
-@RequestMapping(MealRestController.REST_URL)
+@RequestMapping(value = MealRestController.REST_URL, produces = MediaType.APPLICATION_JSON_VALUE)
 public class MealRestController extends AbstractMealController {
     static final String REST_URL = "/rest/meals";
 
@@ -26,13 +26,20 @@ public class MealRestController extends AbstractMealController {
         super.delete(id);
     }
 
-    @PutMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = REST_URL + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@RequestBody Meal meal) {
-        super.update(meal, meal.getId());
+    public void update(@RequestBody Meal meal, @PathVariable int id) {
+        if (meal.getId() == null) {
+            meal.setId(id);
+            super.update(meal, id);
+        } else if (meal.getId().equals(id)) {
+            super.update(meal, id);
+        } else {
+            ResponseEntity.status(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Meal> createWithLocation(@RequestBody Meal meal) {
         Meal created = super.create(meal);
         URI uriOfNewResource = ServletUriComponentsBuilder.fromCurrentContextPath()
@@ -41,7 +48,7 @@ public class MealRestController extends AbstractMealController {
         return ResponseEntity.created(uriOfNewResource).body(created);
     }
 
-    @GetMapping(value = "/filter", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/filter")
     public List<MealTo> getBetween(@RequestParam(required = false) @LocalDateFormat LocalDate fromDate,
                                    @RequestParam(required = false) @LocalTimeFormat LocalTime fromTime,
                                    @RequestParam(required = false) @LocalDateFormat LocalDate toDate,
@@ -49,12 +56,12 @@ public class MealRestController extends AbstractMealController {
         return super.getBetween(fromDate, fromTime, toDate, toTime);
     }
 
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public List<MealTo> getAll() {
         return super.getAll();
     }
 
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{id}")
     public Meal get(@PathVariable int id) {
         return super.get(id);
     }

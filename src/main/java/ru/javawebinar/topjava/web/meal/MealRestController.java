@@ -26,7 +26,7 @@ public class MealRestController extends AbstractMealController {
         super.delete(id);
     }
 
-    @PutMapping(value = REST_URL + "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void update(@RequestBody Meal meal, @PathVariable int id) {
         if (meal.getId() == null) {

@@ -18,7 +18,6 @@ import ru.javawebinar.topjava.web.json.JsonUtil;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,7 +41,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
     @Test
     void update() throws Exception {
         Meal updated = MealTestData.getUpdated();
-        perform(MockMvcRequestBuilders.put(REST_URL)
+        perform(MockMvcRequestBuilders.put(REST_URL + "/" + updated.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(updated)))
                 .andDo(print())
@@ -77,8 +76,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(mvcResult -> assertThat(TestUtil.readListFromJsonMvcResult(mvcResult, MealTo.class))
-                        .isEqualTo(List.of(MEAL_TO_3, MEAL_TO_2, MEAL_TO_1)));
+                .andExpect(TestUtil.contentJson(List.of(MEAL_TO_3, MEAL_TO_2, MEAL_TO_1), MealTo.class));
     }
 
     @Test
@@ -89,8 +87,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(mvcResult -> assertThat(TestUtil.readListFromJsonMvcResult(mvcResult, MealTo.class))
-                        .isEqualTo(List.of(MEAL_TO_3, MEAL_TO_2, MEAL_TO_1)));
+                .andExpect(TestUtil.contentJson(List.of(MEAL_TO_3, MEAL_TO_2, MEAL_TO_1), MealTo.class));
     }
 
     @Test
@@ -99,8 +96,7 @@ public class MealRestControllerTest extends AbstractControllerTest {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(mvcResult -> assertThat(TestUtil.readListFromJsonMvcResult(mvcResult, MealTo.class))
-                        .isEqualTo(MEAL_TOS));
+                .andExpect(TestUtil.contentJson(MEAL_TOS, MealTo.class));
     }
 
     @Test

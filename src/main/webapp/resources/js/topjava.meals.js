@@ -10,7 +10,7 @@ function updateFilteredTable() {
 }
 
 function clearFilter() {
-    $('#filter').find(":input").val("");
+    $('#filter')[0].reset();
     context.updateTable();
 }
 

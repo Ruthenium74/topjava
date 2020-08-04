@@ -1,32 +1,34 @@
-function toggleUserActivation(checkBox, userId) {
-    let enabled = checkBox.is(':checked');
-    $.post(context.ajaxUrl + "setEnabled", {"enable": enabled, "id": userId}).done(() => {
-        checkBox.closest("tr").attr("data-userEnable", enabled);
-        noty(successNoty(enabled ? "common.enabled" : "common.disabled"));
-    }).fail(() => checkBox.prop('checked', !enabled));
+let currentFilter;
+
+function updateFilteredTable() {
+    currentFilter = $('#filter').serialize();
+    if (currentFilter) {
+        $.get(context.ajaxUrl + "filter", currentFilter).done(function (data) {
+            context.datatableApi.clear().rows.add(data).draw();
+        })
+    }
+}
+
+function clearFilter() {
+    $('#filter').find(":input").val("");
+    context.updateTable();
 }
 
 $(function () {
     makeEditable({
-            ajaxUrl: "admin/users/",
+            ajaxUrl: "ajax/meals/",
             datatableApi: $("#datatable").DataTable({
-                "paging": false,
+                "paging": true,
                 "info": true,
                 "columns": [
                     {
-                        "data": "name"
+                        "data": "dateTime"
                     },
                     {
-                        "data": "email"
+                        "data": "description"
                     },
                     {
-                        "data": "roles"
-                    },
-                    {
-                        "data": "enabled"
-                    },
-                    {
-                        "data": "registered"
+                        "data": "calories"
                     },
                     {
                         "defaultContent": "Edit",
@@ -40,13 +42,14 @@ $(function () {
                 "order": [
                     [
                         0,
-                        "asc"
+                        "desc"
                     ]
                 ],
                 "language": {
                     "url": "http://cdn.datatables.net/plug-ins/1.10.21/i18n/Russian.json"
                 }
-            })
+            }),
+            updateTable: updateFilteredTable
         }
     );
 });

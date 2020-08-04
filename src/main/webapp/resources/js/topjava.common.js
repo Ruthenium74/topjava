@@ -22,14 +22,22 @@ function add() {
     $("#editRow").modal();
 }
 
-function deleteRow(id) {
-    $.ajax({
-        url: context.ajaxUrl + id,
-        type: "DELETE"
-    }).done(function () {
-        context.updateTable();
-        successNoty("Deleted");
+function updateTable() {
+    $.get(context.ajaxUrl, function (data) {
+        context.datatableApi.clear().rows.add(data).draw();
     });
+}
+
+function deleteRow(id) {
+    if (confirm("Do you want to delete this row?")) {
+        $.ajax({
+            url: context.ajaxUrl + id,
+            type: "DELETE"
+        }).done(function () {
+            context.updateTable();
+            successNoty("Deleted");
+        });
+    }
 }
 
 function save() {

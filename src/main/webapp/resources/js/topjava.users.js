@@ -2,7 +2,7 @@ function toggleUserActivation(checkBox, userId) {
     let enabled = checkBox.is(':checked');
     $.post(context.ajaxUrl + "setEnabled", {"enable": enabled, "id": userId}).done(() => {
         checkBox.closest("tr").attr("data-userEnable", enabled);
-        noty(successNoty(enabled ? "common.enabled" : "common.disabled"));
+        successNoty(enabled ? "enabled" : "disabled");
     }).fail(() => checkBox.prop('checked', !enabled));
 }
 
@@ -46,7 +46,8 @@ $(function () {
                 "language": {
                     "url": "http://cdn.datatables.net/plug-ins/1.10.21/i18n/Russian.json"
                 }
-            })
+            }),
+            updateTable: updateTable
         }
     );
 });

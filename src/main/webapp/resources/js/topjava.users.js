@@ -6,6 +6,10 @@ function toggleUserActivation(checkBox, userId) {
     }).fail(() => checkBox.prop('checked', !enabled));
 }
 
+function updateTable() {
+    $.get(context.ajaxUrl, fillDataTable);
+}
+
 $(function () {
     makeEditable({
             ajaxUrl: "admin/users/",

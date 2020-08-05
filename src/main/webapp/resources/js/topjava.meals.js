@@ -3,9 +3,7 @@ let currentFilter;
 function updateFilteredTable() {
     currentFilter = $('#filter').serialize();
     if (currentFilter) {
-        $.get(context.ajaxUrl + "filter", currentFilter).done(function (data) {
-            context.datatableApi.clear().rows.add(data).draw();
-        })
+        $.get(context.ajaxUrl + "filter", currentFilter).done(fillDataTable);
     }
 }
 

@@ -13,14 +13,12 @@ function makeEditable(ctx) {
 }
 
 function add() {
-    form[0].reset();
+    form.find(":input").val("");
     $("#editRow").modal();
 }
 
-function updateTable() {
-    $.get(context.ajaxUrl, function (data) {
-        context.datatableApi.clear().rows.add(data).draw();
-    });
+function fillDataTable(data) {
+    context.datatableApi.clear().rows.add(data).draw();
 }
 
 function deleteRow(id) {

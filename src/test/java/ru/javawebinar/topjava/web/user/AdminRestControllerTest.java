@@ -1,10 +1,14 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import ru.javawebinar.topjava.Profiles;
+import ru.javawebinar.topjava.TestUtil;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
@@ -17,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.MealTestData.MEAL_MATCHER;
 
 class AdminRestControllerTest extends AbstractControllerTest {
 
@@ -87,9 +92,21 @@ class AdminRestControllerTest extends AbstractControllerTest {
 
     @Test
     void getWithMeals() throws Exception {
-        perform(MockMvcRequestBuilders.get(REST_URL + "with-meals/" + USER_ID))
+        Assumptions.assumeTrue(Profiles.REPOSITORY_IMPLEMENTATION.equals(Profiles.DATAJPA));
+        MvcResult result = perform(MockMvcRequestBuilders.get(REST_URL + USER_ID + "/with-meals"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(USER_WITH_MEALS_MATCHER.contentJson(USER_WITH_MEALS));
+                .andReturn();
+        User resultUser = TestUtil.readFromJsonMvcResult(result, User.class);
+        USER_MATCHER.assertMatch(resultUser, USER_WITH_MEALS);
+        MEAL_MATCHER.assertMatch(resultUser.getMeals(), USER_WITH_MEALS.getMeals());
+    }
+
+    @Test
+    void setEnable() throws Exception {
+        perform(MockMvcRequestBuilders.post(REST_URL + "/setEnabled")
+                .param("id", "100000").param("enabled", "false"))
+                .andExpect(status().isNoContent());
+        USER_MATCHER.assertMatch(userService.get(USER_ID), getDisabled());
     }
 }

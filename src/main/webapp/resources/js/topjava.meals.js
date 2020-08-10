@@ -1,3 +1,5 @@
+let mealAjaxUrl = "profile/meals/";
+
 function updateFilteredTable() {
     $.ajax({
         type: "GET",
@@ -11,15 +13,31 @@ function clearFilter() {
     $.get("profile/meals/", updateTableByData);
 }
 
+$.ajaxSetup({
+    converters: {
+        "text json": (data) => {
+            let json = JSON.parse(data);
+            $(json).each((index, value) => {
+                value.dateTime = value.dateTime.replace("T", " ").substr(0, 16);
+            });
+            return json;
+        }
+    }
+});
+
 $(function () {
     makeEditable({
-        ajaxUrl: "profile/meals/",
+        ajaxUrl: mealAjaxUrl,
         datatableApi: $("#datatable").DataTable({
+            "ajax": {
+                "url": mealAjaxUrl,
+                "dataSrc": ""
+            },
             "paging": false,
             "info": true,
             "columns": [
                 {
-                    "data": "dateTime"
+                    "data": "dateTime",
                 },
                 {
                     "data": "description"
@@ -28,12 +46,14 @@ $(function () {
                     "data": "calories"
                 },
                 {
-                    "defaultContent": "Edit",
-                    "orderable": false
+                    "defaultContent": "",
+                    "orderable": false,
+                    "render": renderEditBtn,
                 },
                 {
-                    "defaultContent": "Delete",
-                    "orderable": false
+                    "defaultContent": "",
+                    "orderable": false,
+                    "render": renderDeleteBtn,
                 }
             ],
             "order": [
@@ -41,8 +61,33 @@ $(function () {
                     0,
                     "desc"
                 ]
-            ]
+            ],
+            "createdRow": (row, data, dataIndex) => {
+                $(row).attr("data-mealExcess", data.excess);
+            },
+            "language": {
+                "search": i18n["common.search"],
+            },
         }),
-        updateTable: updateFilteredTable
+        updateTable: updateFilteredTable,
+    });
+    $("#startDate").datetimepicker({
+        timepicker: false,
+        format: "Y-m-d",
+    });
+    $("#endDate").datetimepicker({
+        timepicker: false,
+        format: "Y-m-d",
+    });
+    $("#startTime").datetimepicker({
+        datepicker: false,
+        format: "H:i",
+    });
+    $("#endTime").datetimepicker({
+        datepicker: false,
+        format: "H:i",
+    });
+    $("#dateTime").datetimepicker({
+        format: "Y-m-d H:i",
     });
 });

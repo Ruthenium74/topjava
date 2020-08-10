@@ -81,7 +81,10 @@ $(function () {
                     if (!data.enabled) {
                         $(row).attr("data-userEnabled", false);
                     }
-                }
+                },
+                "language": {
+                    "search": i18n["common.search"],
+                },
             }),
             updateTable: function () {
                 $.get(userAjaxUrl, updateTableByData);

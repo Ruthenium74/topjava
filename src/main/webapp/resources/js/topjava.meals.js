@@ -9,7 +9,9 @@ function updateFilteredTable() {
 }
 
 function clearFilter() {
-    $("#filter")[0].reset();
+    $("#filter .form-control").each((index, val) => {
+        $(val).datetimepicker('reset');
+    });
     $.get("profile/meals/", updateTableByData);
 }
 
@@ -71,21 +73,48 @@ $(function () {
         }),
         updateTable: updateFilteredTable,
     });
+
+    $.datetimepicker.setLocale(language.substr(0, 2));
+
     $("#startDate").datetimepicker({
         timepicker: false,
         format: "Y-m-d",
+        onShow: function () {
+            let endDateVal = $("#endDate").val();
+            this.setOptions({
+                maxDate: endDateVal ? endDateVal : false
+            });
+        },
     });
     $("#endDate").datetimepicker({
         timepicker: false,
         format: "Y-m-d",
+        onShow: function () {
+            let startDateVal = $("#startDate").val();
+            this.setOptions({
+                minDate: startDateVal ? startDateVal : false
+            });
+        },
     });
     $("#startTime").datetimepicker({
         datepicker: false,
         format: "H:i",
+        onShow: function () {
+            let endTimeVal = $("#endTime").val();
+            this.setOptions({
+                maxTime: endTimeVal ? endTimeVal : false
+            });
+        },
     });
     $("#endTime").datetimepicker({
         datepicker: false,
         format: "H:i",
+        onShow: function () {
+            let startTimeVal = $("#startTime").val();
+            this.setOptions({
+                minTime: startTimeVal ? startTimeVal : false
+            });
+        },
     });
     $("#dateTime").datetimepicker({
         format: "Y-m-d H:i",

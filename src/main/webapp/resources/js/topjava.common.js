@@ -1,11 +1,19 @@
 var context, form;
 
+let language;
+
 function makeEditable(ctx) {
     context = ctx;
     form = $('#detailsForm');
     $(document).ajaxError(function (event, jqXHR, options, jsExc) {
         failNoty(jqXHR);
     });
+
+    if (window.navigator.languages) {
+        language = window.navigator.languages[0];
+    } else {
+        language = window.navigator.userLanguage || window.navigator.language;
+    }
 
     // solve problem with cache in IE: https://stackoverflow.com/a/4303862/548473
     $.ajaxSetup({cache: false});
@@ -77,7 +85,7 @@ function successNoty(key) {
 function failNoty(jqXHR) {
     closeNoty();
     failedNote = new Noty({
-        text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;" + i18n["common.errorStatus"] + ": " + jqXHR.status + (jqXHR.responseJSON ? "<br>" + jqXHR.responseJSON : ""),
+        text: "<span class='fa fa-lg fa-exclamation-circle'></span> &nbsp;" + i18n["common.errorStatus"] + ": " + jqXHR.status + (jqXHR.responseText ? "<br>" + jqXHR.responseText.replace(/"/g, '') : ""),
         type: "error",
         layout: "bottomRight"
     }).show();

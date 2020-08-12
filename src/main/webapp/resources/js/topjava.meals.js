@@ -3,7 +3,7 @@ let mealAjaxUrl = "profile/meals/";
 function updateFilteredTable() {
     $.ajax({
         type: "GET",
-        url: "profile/meals/filter",
+        url: mealAjaxUrl + "filter",
         data: $("#filter").serialize()
     }).done(updateTableByData);
 }
@@ -12,7 +12,7 @@ function clearFilter() {
     $("#filter .form-control").each((index, val) => {
         $(val).datetimepicker('reset');
     });
-    $.get("profile/meals/", updateTableByData);
+    $.get(mealAjaxUrl, updateTableByData);
 }
 
 $.ajaxSetup({

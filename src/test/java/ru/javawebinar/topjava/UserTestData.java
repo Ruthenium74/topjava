@@ -38,12 +38,20 @@ public class UserTestData {
         return new User(null, "New", "new@gmail.com", "newPass", 1555, false, new Date(), Collections.singleton(Role.USER));
     }
 
+    public static User getNotValidNew() {
+        return new User(null, "", "", "", 2, false, new Date(), Collections.singleton(Role.USER));
+    }
+
     public static User getUpdated() {
         User updated = new User(USER);
         updated.setName("UpdatedName");
         updated.setCaloriesPerDay(330);
         updated.setRoles(Collections.singletonList(Role.ADMIN));
         return updated;
+    }
+
+    public static User getNotValidUpdated() {
+        return new User(USER_ID, "", "", "", 2, Role.USER);
     }
 
     public static String jsonWithPassword(User user, String passw) {

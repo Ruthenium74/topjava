@@ -38,6 +38,12 @@ public class UserTestData {
         return new User(null, "New", "new@gmail.com", "newPass", 1555, false, new Date(), Collections.singleton(Role.USER));
     }
 
+    public static User getNewWithDuplicatedEmail() {
+        User userWithDuplicatedEmail = getNew();
+        userWithDuplicatedEmail.setEmail(USER.getEmail());
+        return userWithDuplicatedEmail;
+    }
+
     public static User getNotValidNew() {
         return new User(null, "", "", "", 2, false, new Date(), Collections.singleton(Role.USER));
     }
@@ -52,6 +58,10 @@ public class UserTestData {
 
     public static User getNotValidUpdated() {
         return new User(USER_ID, "", "", "", 2, Role.USER);
+    }
+
+    public static User getUpdatedWithDuplicatedEmail() {
+        return new User(USER_ID, "UpdatedUser", ADMIN.getEmail(), "password", 2000, Role.USER);
     }
 
     public static String jsonWithPassword(User user, String passw) {

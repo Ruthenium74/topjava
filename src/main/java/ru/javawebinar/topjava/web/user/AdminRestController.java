@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.web.user;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.util.ValidationUtil;
 import ru.javawebinar.topjava.util.exception.IllegalRequestDataException;
+import ru.javawebinar.topjava.web.validation.UserValidator;
 
 import javax.validation.Valid;
 import java.net.URI;
@@ -19,6 +21,9 @@ import java.util.List;
 public class AdminRestController extends AbstractUserController {
 
     static final String REST_URL = "/rest/admin/users";
+
+    @Autowired
+    private UserValidator userValidator;
 
     @GetMapping
     public List<User> getAll() {
@@ -33,6 +38,7 @@ public class AdminRestController extends AbstractUserController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> createWithLocation(@Valid @RequestBody User user, BindingResult bindingResult) {
+        userValidator.validate(user, bindingResult);
         if (bindingResult.hasErrors()) {
             throw new IllegalRequestDataException(ValidationUtil.getErrorResponse(bindingResult));
         }
@@ -54,6 +60,8 @@ public class AdminRestController extends AbstractUserController {
     @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void update(@Valid @RequestBody User user, BindingResult bindingResult, @PathVariable int id) {
+        user.setId(id);
+        userValidator.validate(user, bindingResult);
         if (bindingResult.hasErrors()) {
             throw new IllegalRequestDataException(ValidationUtil.getErrorResponse(bindingResult));
         }

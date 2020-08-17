@@ -93,4 +93,10 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
         service.enable(USER_ID, true);
         assertTrue(service.get(USER_ID).isEnabled());
     }
+
+    @Test
+    void freeEmail() throws Exception {
+        assertTrue(service.isEmailFree("free@mail.ru"));
+        assertFalse(service.isEmailFree(USER.getEmail()));
+    }
 }

@@ -5,19 +5,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.service.UserService;
 import ru.javawebinar.topjava.to.UserTo;
 import ru.javawebinar.topjava.util.UserUtil;
+import ru.javawebinar.topjava.util.exception.ErrorInfo;
+import ru.javawebinar.topjava.util.exception.ErrorType;
 import ru.javawebinar.topjava.web.AbstractControllerTest;
 import ru.javawebinar.topjava.web.json.JsonUtil;
 
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.javawebinar.topjava.ExceptionTestData.CONTEXT_PATH;
+import static ru.javawebinar.topjava.ExceptionTestData.ERROR_INFO_MATCHER;
 import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
 import static ru.javawebinar.topjava.UserTestData.*;
+import static ru.javawebinar.topjava.web.ExceptionInfoHandler.ERROR_MESSAGE_MAP;
 import static ru.javawebinar.topjava.web.user.ProfileRestController.REST_URL;
 
 class ProfileRestControllerTest extends AbstractControllerTest {
@@ -74,13 +81,16 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity());
     }
 
+    @Transactional(propagation = Propagation.NEVER)
     @Test
     void registerWithDuplicateEmail() throws Exception {
         UserTo newTo = new UserTo(null, "newUser", USER.getEmail(), "password", 2000);
         perform(MockMvcRequestBuilders.post(REST_URL + "/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(newTo)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isConflict())
+                .andExpect(ERROR_INFO_MATCHER.contentJson(new ErrorInfo(CONTEXT_PATH + REST_URL + "/register",
+                        ErrorType.VALIDATION_ERROR, ERROR_MESSAGE_MAP.get("users_unique_email_idx"))));
     }
 
     @Test
@@ -104,13 +114,16 @@ class ProfileRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isUnprocessableEntity());
     }
 
+    @Transactional(propagation = Propagation.NEVER)
     @Test
     void updateWithDuplicatedEmail() throws Exception {
         UserTo updatedTo = new UserTo(null, "UpdatedUser", ADMIN.getEmail(), "admin", 2000);
         perform(MockMvcRequestBuilders.put(REST_URL).contentType(MediaType.APPLICATION_JSON)
                 .with(userHttpBasic(USER))
                 .content(JsonUtil.writeValue(updatedTo)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isConflict())
+                .andExpect(ERROR_INFO_MATCHER.contentJson(new ErrorInfo(CONTEXT_PATH + REST_URL,
+                        ErrorType.VALIDATION_ERROR, ERROR_MESSAGE_MAP.get("users_unique_email_idx"))));
     }
 
     @Test

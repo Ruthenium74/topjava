@@ -39,9 +39,7 @@ public class UserTestData {
     }
 
     public static User getNewWithDuplicatedEmail() {
-        User userWithDuplicatedEmail = getNew();
-        userWithDuplicatedEmail.setEmail(USER.getEmail());
-        return userWithDuplicatedEmail;
+        return new User(null, "New", USER.getEmail(), "newPass", 1555, false, new Date(), Collections.singleton(Role.USER));
     }
 
     public static User getNotValidNew() {

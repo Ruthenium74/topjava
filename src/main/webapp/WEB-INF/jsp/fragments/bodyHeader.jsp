@@ -26,5 +26,12 @@
                 </button>
             </form:form>
         </sec:authorize>
+        <div class="btn-group">
+            <button class="btn btn-outline-success dropdown-toggle" data-toggle="dropdown">${pageContext.response.locale}<span class="caret"></span> </button>
+            <ul class="dropdown-menu">
+                <li><a class="btn" href="${requestScope['javax.servlet.forward.request_uri']}?lang=ru">Русский</a></li>
+                <li><a class="btn" href="${requestScope['javax.servlet.forward.request_uri']}?lang=en">English</a></li>
+            </ul>
+        </div>
     </div>
 </nav>

@@ -21,10 +21,7 @@ public class UserToValidator implements Validator {
     @Override
     public void validate(Object o, Errors errors) {
         UserTo userTo = (UserTo) o;
-        if (!userTo.isNew() && service.get(userTo.getId()).getEmail().equals(userTo.getEmail())) {
-            return;
-        }
-        if (!service.isEmailFree(userTo.getEmail())) {
+        if (!service.isEmailFree(userTo)) {
             errors.rejectValue("email", "validation.user.mail.isNotFree", "User with this email already exists");
         }
     }

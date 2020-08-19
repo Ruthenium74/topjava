@@ -2,6 +2,7 @@ package ru.javawebinar.topjava.web.user;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -34,6 +35,9 @@ class AdminRestControllerTest extends AbstractControllerTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    MessageSourceAccessor messageSourceAccessor;
 
     @Test
     void get() throws Exception {
@@ -126,7 +130,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .with(userHttpBasic(ADMIN)))
                 .andExpect(status().isConflict())
                 .andExpect(ERROR_INFO_MATCHER.contentJson(new ErrorInfo(CONTEXT_PATH + REST_URL + USER_ID,
-                        ErrorType.VALIDATION_ERROR, ERROR_MESSAGE_MAP.get("users_unique_email_idx"))));
+                        ErrorType.VALIDATION_ERROR,
+                        messageSourceAccessor.getMessage(ERROR_MESSAGE_MAP.get("users_unique_email_idx")))));
     }
 
     @Test
@@ -165,7 +170,8 @@ class AdminRestControllerTest extends AbstractControllerTest {
                 .with(userHttpBasic(ADMIN)))
                 .andExpect(status().isConflict())
                 .andExpect(ERROR_INFO_MATCHER.contentJson(new ErrorInfo(CONTEXT_PATH + REST_URL,
-                        ErrorType.VALIDATION_ERROR, ERROR_MESSAGE_MAP.get("users_unique_email_idx"))));
+                        ErrorType.VALIDATION_ERROR,
+                        messageSourceAccessor.getMessage(ERROR_MESSAGE_MAP.get("users_unique_email_idx")))));
     }
 
     @Test

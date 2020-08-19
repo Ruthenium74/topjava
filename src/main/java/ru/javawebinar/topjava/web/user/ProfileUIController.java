@@ -4,7 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.SessionStatus;
@@ -20,6 +22,11 @@ public class ProfileUIController extends AbstractUserController {
     @Autowired
     private UserToValidator userToValidator;
 
+    @InitBinder
+    private void initBinder(WebDataBinder binder) {
+        binder.addValidators(userToValidator);
+    }
+
     @GetMapping
     public String profile() {
         return "profile";
@@ -27,8 +34,6 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping
     public String updateProfile(@Valid UserTo userTo, BindingResult result, SessionStatus status) {
-        userTo.setId(SecurityUtil.authUserId());
-        userToValidator.validate(userTo, result);
         if (result.hasErrors()) {
             return "profile";
         } else {
@@ -48,7 +53,6 @@ public class ProfileUIController extends AbstractUserController {
 
     @PostMapping("/register")
     public String saveRegister(@Valid UserTo userTo, BindingResult result, SessionStatus status, ModelMap model) {
-        userToValidator.validate(userTo, result);
         if (result.hasErrors()) {
             model.addAttribute("register", true);
             return "profile";

@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
+import ru.javawebinar.topjava.util.UserUtil;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.validation.ConstraintViolationException;
@@ -79,9 +80,9 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
 
     @Test
     void createWithException() throws Exception {
-        validateRootCause(() -> service.create(new User(null, "  ", "mail@yandex.ru", "password",  2000, Role.USER)), ConstraintViolationException.class);
-        validateRootCause(() -> service.create(new User(null, "User", "  ", "password",  2000, Role.USER)), ConstraintViolationException.class);
-        validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "  ",  2000, Role.USER)), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new User(null, "  ", "mail@yandex.ru", "password", 2000, Role.USER)), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new User(null, "User", "  ", "password", 2000, Role.USER)), ConstraintViolationException.class);
+        validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "  ", 2000, Role.USER)), ConstraintViolationException.class);
         validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "password", 9, true, new Date(), Set.of())), ConstraintViolationException.class);
         validateRootCause(() -> service.create(new User(null, "User", "mail@yandex.ru", "password", 10001, true, new Date(), Set.of())), ConstraintViolationException.class);
     }
@@ -96,7 +97,7 @@ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
 
     @Test
     void freeEmail() throws Exception {
-        assertTrue(service.isEmailFree("free@mail.ru"));
-        assertFalse(service.isEmailFree(USER.getEmail()));
+        assertTrue(service.isEmailFree(UserUtil.asTo(getNew())));
+        assertFalse(service.isEmailFree(UserUtil.asTo(getNewWithDuplicatedEmail())));
     }
 }

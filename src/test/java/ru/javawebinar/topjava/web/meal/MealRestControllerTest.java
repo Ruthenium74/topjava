@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.web.meal;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -21,8 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.javawebinar.topjava.ExceptionTestData.CONTEXT_PATH;
-import static ru.javawebinar.topjava.ExceptionTestData.ERROR_INFO_MATCHER;
+import static ru.javawebinar.topjava.ExceptionTestData.*;
 import static ru.javawebinar.topjava.MealTestData.*;
 import static ru.javawebinar.topjava.TestUtil.readFromJson;
 import static ru.javawebinar.topjava.TestUtil.userHttpBasic;
@@ -38,6 +38,9 @@ class MealRestControllerTest extends AbstractControllerTest {
 
     @Autowired
     private MealService mealService;
+
+    @Autowired
+    MessageSourceAccessor messageSourceAccessor;
 
     @Test
     void get() throws Exception {
@@ -95,7 +98,8 @@ class MealRestControllerTest extends AbstractControllerTest {
         perform(MockMvcRequestBuilders.put(REST_URL + MEAL1_ID).contentType(MediaType.APPLICATION_JSON)
                 .content(JsonUtil.writeValue(notValidUpdated))
                 .with(userHttpBasic(USER)))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(ERROR_INFO_MATCHER_IGNORING_MESSAGE.contentJson(new ErrorInfo(CONTEXT_PATH + REST_URL + MEAL1_ID, ErrorType.VALIDATION_ERROR)));
     }
 
     @Transactional(propagation = Propagation.NEVER)
@@ -111,7 +115,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(ERROR_INFO_MATCHER.contentJson(
                         new ErrorInfo(CONTEXT_PATH + REST_URL + MEAL1_ID,
                                 ErrorType.VALIDATION_ERROR,
-                                ERROR_MESSAGE_MAP.get("meals_unique_user_datetime_idx"))));
+                                messageSourceAccessor.getMessage(ERROR_MESSAGE_MAP.get("meals_unique_user_datetime_idx")))));
     }
 
     @Test
@@ -152,7 +156,7 @@ class MealRestControllerTest extends AbstractControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(ERROR_INFO_MATCHER.contentJson(new ErrorInfo(CONTEXT_PATH + REST_URL,
                         ErrorType.VALIDATION_ERROR,
-                        ERROR_MESSAGE_MAP.get("meals_unique_user_datetime_idx"))));
+                        messageSourceAccessor.getMessage(ERROR_MESSAGE_MAP.get("meals_unique_user_datetime_idx")))));
     }
 
     @Test
